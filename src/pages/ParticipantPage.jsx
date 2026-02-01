@@ -1,4 +1,3 @@
-import { useRef } from 'react';
 import { useParticipant } from '../contexts/ParticipantContext';
 import { useGameState } from '../contexts/GameContext';
 import { JoinGame, WaitingRoom, QuestionDisplay, FinalLeaderboard, GameReady } from '../components/participant';
@@ -7,18 +6,7 @@ import { GAME_STATUS } from '../utils/constants';
 
 export function ParticipantPage() {
   const { participant } = useParticipant();
-  const { status, loading, currentQuestion } = useGameState();
-  const hasSeenQuestion = useRef(false);
-
-  // Track whether participant has seen at least one question
-  if (currentQuestion) {
-    hasSeenQuestion.current = true;
-  }
-
-  // Reset when game is no longer active
-  if (status !== GAME_STATUS.ACTIVE) {
-    hasSeenQuestion.current = false;
-  }
+  const { status, loading, currentQuestion, registrationOpen } = useGameState();
 
   // Show loading while fetching game state
   if (loading) {
@@ -40,11 +28,11 @@ export function ParticipantPage() {
     return <QuestionDisplay />;
   }
 
-  // Game just started, first question hasn't loaded yet - show interim screen
-  if (status === GAME_STATUS.ACTIVE && !hasSeenQuestion.current) {
+  // Registration closed, waiting for admin to start game - show "All Set!"
+  if (status === GAME_STATUS.REGISTRATION && !registrationOpen) {
     return <GameReady />;
   }
 
-  // Otherwise show waiting room (also covers gap between questions)
+  // Otherwise show waiting room
   return <WaitingRoom />;
 }

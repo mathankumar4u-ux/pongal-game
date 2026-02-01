@@ -2,7 +2,8 @@ import { useState } from 'react';
 import { useGameState } from '../../contexts/GameContext';
 import {
   openRegistration,
-  closeRegistrationAndStart,
+  closeRegistration,
+  startGame,
   releaseNextQuestion,
   endGame,
   resetGame,
@@ -13,7 +14,7 @@ import { GAME_STATUS } from '../../utils/constants';
 import { clsx } from 'clsx';
 
 export function GameControls() {
-  const { status, currentQuestionIndex, totalQuestions } = useGameState();
+  const { status, currentQuestionIndex, totalQuestions, registrationOpen } = useGameState();
   const [error, setError] = useState(null);
 
   const handleAction = async (action, confirmMessage = null) => {
@@ -91,40 +92,41 @@ export function GameControls() {
           </Button>
         )}
 
-        {/* Close Registration & Start Game */}
-        {status === GAME_STATUS.REGISTRATION && (
+        {/* Close Registration */}
+        {status === GAME_STATUS.REGISTRATION && registrationOpen && (
           <Button
             onClick={() => handleAction(
-              closeRegistrationAndStart,
-              'This will close registration and start the game. Continue?'
+              closeRegistration,
+              'This will close registration. Continue?'
             )}
             variant="warning"
             fullWidth
           >
-            Close Registration & Start Game
+            Close Registration
           </Button>
         )}
 
-        {/* All Set confirmation - waiting to release first question */}
-        {status === GAME_STATUS.ACTIVE && currentQuestionIndex === -1 && (
+        {/* Registration closed - waiting to start game */}
+        {status === GAME_STATUS.REGISTRATION && !registrationOpen && (
           <>
             <div className="p-4 bg-green-50 border border-green-200 rounded-lg text-center mb-3">
               <p className="text-green-800 font-semibold text-lg">All Set!</p>
               <p className="text-green-600 text-sm mt-1">
-                Participants are seeing the ready screen. Release the first question when ready.
+                Registration is closed. Participants are seeing the ready screen.
+                Start the game when everyone is ready.
               </p>
             </div>
             <Button
-              onClick={() => handleAction(releaseNextQuestion)}
+              onClick={() => handleAction(startGame)}
               fullWidth
             >
-              Release Question 1
+              Start Game - Release Question 1
             </Button>
           </>
         )}
 
         {/* Release Next Question / End Game */}
-        {status === GAME_STATUS.ACTIVE && currentQuestionIndex >= 0 && (
+        {status === GAME_STATUS.ACTIVE && (
           <>
             {currentQuestionIndex < totalQuestions - 1 ? (
               <Button

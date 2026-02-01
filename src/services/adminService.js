@@ -48,7 +48,7 @@ export async function openRegistration() {
   }, { merge: true });
 }
 
-export async function closeRegistrationAndStart() {
+export async function closeRegistration() {
   // Get total questions count
   const questionsSnapshot = await getDocs(collection(db, 'questions'));
   const totalQuestions = questionsSnapshot.size;
@@ -57,16 +57,25 @@ export async function closeRegistrationAndStart() {
     throw new Error('No questions loaded. Please add questions first.');
   }
 
-  // Update game session - don't release first question yet
-  // Admin will release it manually after confirming all participants are ready
+  // Close registration but keep status as REGISTRATION
+  // Participants will see "All Set!" screen, admin can start game when ready
+  await updateDoc(gameSessionRef, {
+    registrationOpen: false,
+    totalQuestions,
+    updatedAt: serverTimestamp()
+  });
+}
+
+export async function startGame() {
+  // Move to ACTIVE and release the first question
   await updateDoc(gameSessionRef, {
     status: GAME_STATUS.ACTIVE,
-    registrationOpen: false,
-    currentQuestionIndex: -1,
-    totalQuestions,
+    currentQuestionIndex: 0,
     gameStartedAt: serverTimestamp(),
     updatedAt: serverTimestamp()
   });
+
+  await releaseQuestion(1);
 }
 
 async function releaseQuestion(questionNumber) {

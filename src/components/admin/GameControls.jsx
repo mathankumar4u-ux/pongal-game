@@ -105,8 +105,26 @@ export function GameControls() {
           </Button>
         )}
 
+        {/* All Set confirmation - waiting to release first question */}
+        {status === GAME_STATUS.ACTIVE && currentQuestionIndex === -1 && (
+          <>
+            <div className="p-4 bg-green-50 border border-green-200 rounded-lg text-center mb-3">
+              <p className="text-green-800 font-semibold text-lg">All Set!</p>
+              <p className="text-green-600 text-sm mt-1">
+                Participants are seeing the ready screen. Release the first question when ready.
+              </p>
+            </div>
+            <Button
+              onClick={() => handleAction(releaseNextQuestion)}
+              fullWidth
+            >
+              Release Question 1
+            </Button>
+          </>
+        )}
+
         {/* Release Next Question / End Game */}
-        {status === GAME_STATUS.ACTIVE && (
+        {status === GAME_STATUS.ACTIVE && currentQuestionIndex >= 0 && (
           <>
             {currentQuestionIndex < totalQuestions - 1 ? (
               <Button

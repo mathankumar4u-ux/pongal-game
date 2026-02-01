@@ -57,18 +57,16 @@ export async function closeRegistrationAndStart() {
     throw new Error('No questions loaded. Please add questions first.');
   }
 
-  // Update game session
+  // Update game session - don't release first question yet
+  // Admin will release it manually after confirming all participants are ready
   await updateDoc(gameSessionRef, {
     status: GAME_STATUS.ACTIVE,
     registrationOpen: false,
-    currentQuestionIndex: 0,
+    currentQuestionIndex: -1,
     totalQuestions,
     gameStartedAt: serverTimestamp(),
     updatedAt: serverTimestamp()
   });
-
-  // Release first question
-  await releaseQuestion(1);
 }
 
 async function releaseQuestion(questionNumber) {
